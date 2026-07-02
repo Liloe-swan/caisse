@@ -1,4 +1,4 @@
-# Structure de base Flask — Projet de fin d'année L3
+# Structure de base Flask — Projet de fin d'année L1
 
 Structure minimale mais complète pour démarrer un projet Flask : authentification simple + un exemple de CRUD (tâches), à adapter selon le sujet de chaque projet.
 
