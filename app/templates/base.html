@@ -3,283 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>{% block title %}SmartCaisse{% endblock %}</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo-smartcaisse.png') }}">
     <style>
-        body {
-            font-family: "Segoe UI", sans-serif;
-        }
+        body { font-family: "Segoe UI", sans-serif; }
     </style>
-
     {% block extra_css %}{% endblock %}
 </head>
-
 <body class="bg-[#f5f6f8]">
 
 <div class="flex h-screen overflow-hidden">
-
     <aside class="w-72 bg-[#0b2240] text-white flex flex-col shadow-xl">
-
         <div class="h-24 flex items-center justify-center border-b border-white/10 px-4 select-none">
-            
-            <h1 class="text-3xl font-black tracking-tight">
-                <span class="text-white">Smart</span><span class="text-white">Caisse</span>
-            </h1>
+            <h1 class="text-3xl font-black tracking-tight"><span class="text-white">Smart</span><span class="text-white">Caisse</span></h1>
         </div>
-
         <nav class="flex-1 px-5 py-6 space-y-2">
-
             {% if current_user.is_authenticated and current_user.role == "admin" %}
-                <a href="{{ url_for('main.dashboard') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-lg transition {% if request.endpoint == 'main.dashboard' %} bg-white text-[#b59240] font-semibold {% else %} hover:bg-white/10 {% endif %}">
+                <a href="{{ url_for('main.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg transition {% if request.endpoint == 'main.dashboard' %} bg-white text-[#b59240] font-semibold {% else %} hover:bg-white/10 {% endif %}">
                      <i data-lucide="layout-dashboard"></i> Dashboard
                 </a>
             {% endif %}
-
-            <a href="{{ url_for('main.vente') }}"
-               class="flex items-center gap-3 px-4 py-3 rounded-lg transition {% if request.endpoint == 'main.vente' %} bg-white text-[#b59240] font-semibold {% else %} hover:bg-white/10 {% endif %}">
+            <a href="{{ url_for('main.vente') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg transition {% if request.endpoint == 'main.vente' %} bg-white text-[#b59240] font-semibold {% else %} hover:bg-white/10 {% endif %}">
                  <i data-lucide="shopping-bag"></i> Vente
             </a>
-
-            <a href="{{ url_for('main.produits') }}"
-               class="flex items-center gap-3 px-4 py-3 rounded-lg transition {% if request.endpoint == 'main.produits' %} bg-white text-[#b59240] font-semibold {% else %} hover:bg-white/10 {% endif %}">
+            <a href="{{ url_for('main.produits') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg transition {% if request.endpoint == 'main.produits' %} bg-white text-[#b59240] font-semibold {% else %} hover:bg-white/10 {% endif %}">
                  <i data-lucide="package-search"></i> Produits
             </a>
-
             {% if current_user.is_authenticated and current_user.role == "admin" %}
-                <a href="{{ url_for('main.utilisateurs') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-lg transition {% if request.endpoint == 'main.utilisateurs' %} bg-white text-[#b59240] font-semibold {% else %} hover:bg-white/10 {% endif %}">
+                <a href="{{ url_for('main.utilisateurs') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg transition {% if request.endpoint == 'main.utilisateurs' %} bg-white text-[#b59240] font-semibold {% else %} hover:bg-white/10 {% endif %}">
                      <i data-lucide="users"></i> Utilisateurs
                 </a>
-
-                <a href="{{ url_for('main.fournisseurs') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-lg transition {% if request.endpoint == 'main.fournisseurs' %} bg-white text-[#b59240] font-semibold {% else %} hover:bg-white/10 {% endif %}">
+                <a href="{{ url_for('main.fournisseurs') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg transition {% if request.endpoint == 'main.fournisseurs' %} bg-white text-[#b59240] font-semibold {% else %} hover:bg-white/10 {% endif %}">
                      <i data-lucide="truck"></i> Fournisseurs
                 </a>
             {% endif %}
-
         </nav>
-        
         {% if current_user.is_authenticated %}
         <div class="border-t border-white/10 p-5">
-
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 rounded-full bg-white text-[#0b2240] flex items-center justify-center font-bold text-lg">
                     {{ current_user.nom_utilisateur[0]|upper }}
                 </div>
-
                 <div>
-                    <p class="font-semibold">
-                        {{ current_user.nom_utilisateur }}
-                    </p>
-                    <p class="text-sm text-gray-300">
-                        {{ current_user.role|capitalize }}
-                    </p>
+                    <p class="font-semibold">{{ current_user.nom_utilisateur }}</p>
+                    <p class="text-sm text-gray-300">{{ current_user.role|capitalize }}</p>
                 </div>
             </div>
-
-            <a href="{{ url_for('main.logout') }}"
-               class="mt-5 flex justify-center bg-red-500 hover:bg-red-600 rounded-lg py-2 transition font-bold">
-                  Déconnexion
-            </a>
-
+            <a href="{{ url_for('main.logout') }}" class="mt-5 flex justify-center bg-red-500 hover:bg-red-600 rounded-lg py-2 transition font-bold">Déconnexion</a>
         </div>
         {% endif %}
-
     </aside>
 
     <div class="flex-1 flex flex-col overflow-hidden">
-
         <header class="bg-[#0b2240] h-20 px-8 flex items-center justify-between shadow relative">
-            
-            <div class="flex-1 max-w-xl">
-                <form method="GET" action="{{ url_for('main.produits') }}" class="relative">
+            <div class="flex-1 max-w-xl relative">
+                <div class="relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                         <i data-lucide="search" class="w-5 h-5"></i>
                     </span>
-                    <input
-                        type="text"
-                        name="q"
-                        value="{{ request.args.get('q','') }}"
-                        placeholder="Rechercher un produit, une vente, une référence..."
-                        class="w-full rounded-full pl-12 pr-5 py-2.5 outline-none bg-white/10 text-white placeholder-white/60 focus:bg-white focus:text-[#0b2240] focus:placeholder-gray-400 transition-all duration-300">
-                </form> 
+                    <input type="text" id="main-search-input" autocomplete="off" placeholder="Rechercher un produit, une vente, une référence..." class="w-full rounded-full pl-12 pr-5 py-2.5 outline-none bg-white/10 text-white placeholder-white/60 focus:bg-white focus:text-[#0b2240] transition-all">
+                </div>
+                <div id="search-results" class="hidden absolute left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-[9999]">
+                    <ul id="results-list" class="divide-y divide-gray-50 text-gray-800"></ul>
+                </div>
             </div>
 
             <div class="flex items-center gap-6 text-white">
-                
-                <div class="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg text-sm border border-white/5 select-none">
-                    <i data-lucide="clock" class="w-4 h-4 text-white/85"></i>
-                    <span id="liveClock" class="font-mono font-semibold tracking-wider text-white">00:00:00</span>
+                <div class="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg text-sm border border-white/5">
+                    <i data-lucide="clock" class="w-4 h-4"></i>
+                    <span id="liveClock" class="font-mono font-semibold">00:00:00</span>
                 </div>
                 
                 <div class="relative">
-                    <button id="quickActionBtn" class="flex items-center gap-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition font-medium focus:outline-none">
-                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                        <span>Action</span>
+                    <button id="quickActionBtn" class="flex items-center gap-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition font-medium">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i> <span>Action</span>
                     </button>
                     <div id="quickActionMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 text-gray-700 z-50">
-                        <a href="{{ url_for('main.vente') }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition">
-                            <i data-lucide="shopping-cart" class="w-4 h-4 text-emerald-500"></i> Nouvelle Vente
-                        </a>
-                        <a href="{{ url_for('main.produits') }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition">
-                            <i data-lucide="plus" class="w-4 h-4 text-blue-500"></i> Ajouter un Produit
-                        </a>
-                        <div class="border-t border-gray-100 my-1"></div>
-                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition text-sm text-gray-500">
-                            <i data-lucide="file-text" class="w-4 h-4"></i> Clôture de caisse
-                        </a>
+                        <a href="{{ url_for('main.vente') }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50"><i data-lucide="shopping-cart" class="w-4 h-4 text-emerald-500"></i> Nouvelle Vente</a>
+                        <a href="{{ url_for('main.produits') }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50"><i data-lucide="plus" class="w-4 h-4 text-blue-500"></i> Ajouter un Produit</a>
                     </div>
                 </div>
 
                 <div class="relative">
-                    <button id="notificationBtn" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition relative focus:outline-none">
-                        {% if alertes and alertes|length > 0 %}
-                            <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-[#0b2240]"></span>
-                        {% endif %}
+                    <button id="notificationBtn" class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition relative">
+                        {% if alertes and alertes|length > 0 %}<span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></span>{% endif %}
                         <i data-lucide="bell" class="w-5 h-5"></i>
                     </button>
-                    
                     <div id="notificationMenu" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 py-2 text-gray-700 z-50">
-                        <div class="px-4 py-2 font-bold border-b border-gray-100 text-sm flex justify-between items-center">
-                            <span>Notifications</span>
-                            <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
-                                {{ alertes|length if alertes else 0 }} alerte(s)
-                            </span>
-                        </div>
-                        <div class="max-h-64 overflow-y-auto">
-                            {% if alertes and alertes|length > 0 %}
-                                {% for alerte in alertes %}
-                                    <div class="block px-4 py-3 border-b border-gray-50 last:border-b-0">
-                                        <p class="text-xs font-semibold flex items-center gap-1 
-                                            {% if alerte.niveau == 'critique' %} text-red-500 
-                                            {% elif alerte.niveau == 'attention' %} text-amber-500 
-                                            {% else %} text-blue-500 {% endif %}">
-                                            <span class="w-1.5 h-1.5 rounded-full 
-                                                {% if alerte.niveau == 'critique' %} bg-red-500 
-                                                {% elif alerte.niveau == 'attention' %} bg-amber-500 
-                                                {% else %} bg-blue-500 {% endif %}"></span>
-                                            {{ alerte.titre }}
-                                        </p>
-                                        <p class="text-sm text-gray-600 mt-0.5">{{ alerte.message }}</p>
-                                    </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="px-4 py-6 text-center text-sm text-gray-400">
-                                    <i data-lucide="check-circle" class="w-8 h-8 mx-auto mb-2 text-gray-300"></i>
-                                    Aucune alerte pour le moment
-                                </div>
-                            {% endif %}
-                        </div>
+                        <div class="px-4 py-2 font-bold border-b border-gray-100 text-sm">Notifications</div>
                     </div>
                 </div>
-
             </div>
         </header>
 
         <main class="flex-1 overflow-y-auto p-8">
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for categorie, message in messages %}
-                        <div class="mb-4 rounded-xl p-4 flash-message transition-all duration-500 transform
-                        {% if categorie == 'success' %}
-                            bg-green-100 text-green-700
-                        {% elif categorie == 'danger' %}
-                            bg-red-100 text-red-700
-                        {% else %}
-                            bg-blue-100 text-blue-700
-                        {% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            {% block content %}
-            {% endblock %}
-
+            {% block content %}{% endblock %}
         </main>
-
     </div>
-
 </div>
 
 <script>
-    // Initialisation des icônes Lucide
     lucide.createIcons();
 
-    // Fonction d'horloge en direct
-    function initLiveClock() {
-        const clockElement = document.getElementById('liveClock');
-        if (!clockElement) return;
-
-        function updateTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            clockElement.textContent = `${hours}:${minutes}:${seconds}`;
-        }
-        
-        updateTime(); // Appel immédiat pour éviter le délai d'une seconde
-        setInterval(updateTime, 1000);
+    // Horloge
+    function updateClock() {
+        document.getElementById('liveClock').textContent = new Date().toLocaleTimeString();
     }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    // Lancement de l'horloge dès que le DOM est chargé
-    document.addEventListener("DOMContentLoaded", initLiveClock);
-
-    // Récupération des éléments du DOM
-    const quickActionBtn = document.getElementById('quickActionBtn');
-    const quickActionMenu = document.getElementById('quickActionMenu');
-    const notificationBtn = document.getElementById('notificationBtn');
-    const notificationMenu = document.getElementById('notificationMenu');
-    
-    // Gestion du menu Action Rapide
-    quickActionBtn.addEventListener('click', (e) => {
+    // Menu Logic
+    document.getElementById('quickActionBtn').addEventListener('click', (e) => {
         e.stopPropagation();
-        quickActionMenu.classList.toggle('hidden');
-        notificationMenu.classList.add('hidden');
+        document.getElementById('quickActionMenu').classList.toggle('hidden');
     });
-
-    // Gestion du menu Notifications
-    notificationBtn.addEventListener('click', (e) => {
+    document.getElementById('notificationBtn').addEventListener('click', (e) => {
         e.stopPropagation();
-        notificationMenu.classList.toggle('hidden');
-        quickActionMenu.classList.add('hidden');
-    });
-
-    // Fermer les menus au clic à l'extérieur
-    document.addEventListener('click', () => {
-        quickActionMenu.classList.add('hidden');
-        notificationMenu.classList.add('hidden');
-    });
-
-    // Disparition progressive et automatique des alertes flash
-    document.addEventListener("DOMContentLoaded", function() {
-        const alerts = document.querySelectorAll('.flash-message');
-        
-        alerts.forEach(function(alert) {
-            setTimeout(function() {
-                alert.style.opacity = '0';
-                alert.style.transform = 'translateY(-10px)';
-                alert.style.transition = 'all 0.5s ease-out';
-                
-                setTimeout(function() {
-                    alert.remove();
-                }, 500); 
-                
-            }, 2000);
-        });
+        document.getElementById('notificationMenu').classList.toggle('hidden');
     });
 </script>
 
-{% block extra_js %}
-{% endblock %}
-
+<script src="{{ url_for('static', filename='js/extra.js') }}"></script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -85,22 +85,39 @@ def logout():
     return redirect(url_for('main.accueil'))
 
 
+from datetime import date, timedelta
+from app.models import Produit
+
 @main.context_processor
 def inject_notifications():
-    alertes = [
-        {
+    alertes = []
+    today = date.today()
+    seuil_alerte_date = today + timedelta(days=15)
+
+    # 1. Alerte Rupture de stock (Stock <= 0)
+    ruptures = Produit.query.filter(Produit.stock <= 0).all()
+    for p in ruptures:
+        alertes.append({
             "niveau": "critique",
             "titre": "Rupture de stock",
-            "message": "Le produit 'Huile Végétale 1L' a atteint un stock de 0."
-        },
-        {
+            "message": f"Le produit '{p.nom}' est en rupture totale."
+        })
+
+    # 2. Alerte Péremption proche (Expire dans les 15 prochains jours)
+    proches_peremption = Produit.query.filter(
+        Produit.date_peremption.isnot(None),
+        Produit.date_peremption <= seuil_alerte_date,
+        Produit.date_peremption >= today
+    ).count()
+
+    if proches_peremption > 0:
+        alertes.append({
             "niveau": "attention",
             "titre": "Péremption proche",
-            "message": "3 articles expirent dans moins de 15 jours."
-        }
-    ]
-    return dict(alertes=alertes)
+            "message": f"{proches_peremption} article(s) expirent dans moins de 15 jours."
+        })
 
+    return dict(alertes=alertes)
 
 # --- NOUVELLE ROUTE : API POUR LA BARRE DE RECHERCHE DYNAMIQUE ---
 
