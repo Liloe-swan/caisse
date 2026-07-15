@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Gestion des Utilisateurs{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit">
+        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2 mb-4">
+            <i data-lucide="user-plus" class="w-5 h-5 text-[#355867]"></i> Nouvel Utilisateur
+        </h3>
+        <p class="text-xs text-gray-400 mb-5">Enregistrez un nouveau caissier ou administrateur système.</p>
+
+        <form method="POST" action="{{ url_for('main.utilisateurs') }}" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nom d'utilisateur</label>
+                <input type="text" name="nom_utilisateur" required
+                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
+                       placeholder="ex: amadou_diop">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Rôle Système</label>
+                <select name="role" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition">
+                    <option value="vendeur">Vendeur / Caissier</option>
+                    <option value="admin">Administrateur</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Mot de passe</label>
+                <input type="password" name="mot_de_passe" required
+                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
+                       placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="w-full py-3 px-4 bg-[#355867] hover:bg-[#27424e] text-white font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2 cursor-pointer mt-2">
+                <i data-lucide="check-circle" class="w-4 h-4"></i> Enregistrer l'agent
+            </button>
+        </form>
+    </div>
+
+    <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 overflow-hidden">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i> Personnel & Rôles
+                </h3>
+                <p class="text-xs text-gray-400 mt-1">Liste complète des accès actifs de votre caisse.</p>
+            </div>
+            <span class="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-600 rounded-full flex items-center gap-1.5">
+                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                Suivi Sécurité
+            </span>
+        </div>
+
+        <div class="space-y-4">
+            <div class="grid grid-cols-4 text-xs font-bold text-gray-400 uppercase tracking-wider pb-2 border-b border-gray-100">
+                <div>Utilisateur</div>
+                <div>Type de Rôle</div>
+                <div>Statut Connexion</div>
+                <div class="text-right">Actions</div>
+            </div>
+
+            <div class="divide-y divide-gray-50 overflow-y-auto max-h-[400px] pr-2">
+                {% for user in utilisateurs %}
+                <div class="grid grid-cols-4 items-center py-3 text-sm">
+                    <div>
+                        <p class="font-bold text-gray-800">{{ user.nom_utilisateur }}</p>
+                        <p class="text-xs text-gray-400">{{ user.email }}</p>
+                    </div>
+                    
+                    <div>
+                        {% if user.role == 'admin' %}
+                            <span class="px-2.5 py-1 text-xs font-semibold bg-purple-50 text-purple-700 rounded-full border border-purple-100">
+                                Administrateur
+                            </span>
+                        {% else %}
+                            <span class="px-2.5 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-100">
+                                Vendeur / Caissier
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Actif
+                        </span>
+                    </div>
+
+                    <div class="text-right">
+                        <a href="{{ url_for('main.supprimer_utilisateur', user_id=user.id) }}" 
+                           class="text-gray-400 hover:text-red-600 p-1.5 inline-block transition rounded-lg hover:bg-red-50"
+                           onclick="return confirm('Voulez-vous vraiment révoquer les accès de cet utilisateur ?');">
+                            <i data-lucide="user-x" class="w-4 h-4 inline"></i>
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-8 text-gray-400">
+                    <p>Aucun utilisateur enregistré pour le moment.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

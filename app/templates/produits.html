@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block title %}Gestion des Produits{% endblock %}
+
+{% block page_title %}Produits{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Produits</p>
+                <h3 class="text-3xl font-extrabold text-gray-800 mt-1">{{ liste_produits|length }}</h3>
+            </div>
+            <div class="p-3.5 bg-blue-50 text-blue-600 rounded-xl">
+                <i data-lucide="package" class="w-6 h-6"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">En Stock</p>
+                <h3 class="text-3xl font-extrabold text-emerald-600 mt-1">
+                    {% set ns = namespace(total=0) %}
+                    {% for p in liste_produits %}{% if (p.stock|int) > 0 %}{% set ns.total = ns.total + 1 %}{% endif %}{% endfor %}
+                    {{ ns.total }}
+                </h3>
+            </div>
+            <div class="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                <i data-lucide="check-square" class="w-6 h-6"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Ruptures</p>
+                <h3 class="text-3xl font-extrabold text-red-600 mt-1">
+                    {% set nr = namespace(total=0) %}
+                    {% for p in liste_produits %}{% if (p.stock|int) <= 0 %}{% set nr.total = nr.total + 1 %}{% endif %}{% endfor %}
+                    {{ nr.total }}
+                </h3>
+            </div>
+            <div class="p-3.5 bg-red-50 text-red-600 rounded-xl">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Valeur Estimée</p>
+                <h3 class="text-2xl font-extrabold text-gray-800 mt-1.5">
+                    {% set nv = namespace(valeur=0) %}
+                    {% for p in liste_produits %}
+                        {% set nv.valeur = nv.valeur + ((p.prix_vente|float) * (p.stock|int)) %}
+                    {% endfor %}
+                    {{ nv.valeur }} FCFA
+                </h3>
+            </div>
+            <div class="p-3.5 bg-amber-50 text-amber-600 rounded-xl">
+                <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-center">
+        <div class="relative w-full sm:w-80">
+            <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-4 top-3.5"></i>
+            <input type="text" id="rechercheProduit" placeholder="Rechercher par nom, catégorie, réf..." 
+                   class="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-[#355867]/20 focus:border-[#355867] transition">
+        </div>
+
+        {% if current_user.role == "admin" %}
+        <button onclick="toggleModal(true)" class="w-full sm:w-auto px-5 py-2.5 bg-[#355867] hover:bg-[#27424e] text-white font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i> Ajouter un produit
+        </button>
+        {% endif %}
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" id="tableProduits">
+                <thead>
+                    <tr class="bg-gray-50/70 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <th class="py-4 px-6 w-16 text-center">#</th>
+                        <th class="py-4 px-6">Désignation</th>
+                        <th class="py-4 px-6">Catégorie</th>
+                        <th class="py-4 px-6">Prix HT</th>
+                        <th class="py-4 px-6">TVA / TTC</th>
+                        <th class="py-4 px-6 text-center">Stock</th>
+                        <th class="py-4 px-6">Péremption</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm text-gray-600">
+                    {% if liste_produits and liste_produits|length > 0 %}
+                        {% for produit in liste_produits %}
+                        <tr class="hover:bg-gray-50/50 transition">
+                            <td class="py-4 px-6 text-center font-medium text-gray-400">{{ loop.index }}</td>
+                            <td class="py-4 px-6">
+                                <span class="font-semibold text-gray-800 block raw-name">{{ produit.nom }}</span>
+                                <span class="text-xs text-gray-400 block mt-0.5 raw-code">{{ produit.code_barres or 'Pas de code' }}</span>
+                            </td>
+                            <td class="py-4 px-6 raw-cat">{{ produit.categorie.nom if produit.categorie else 'Aucune' }}</td>
+                            <td class="py-4 px-6 font-medium">{{ produit.prix_vente }} FCFA</td>
+                            <td class="py-4 px-6">
+                                <span class="text-xs text-gray-400 block">{{ produit.taux_tva or 0 }}% TVA</span>
+                                <span class="font-bold text-emerald-600">{{ produit.prix_vente_ttc or produit.prix_vente }} FCFA</span>
+                            </td>
+                            <td class="py-4 px-6 text-center">
+                                {% if (produit.stock|int) <= (produit.seuil_alerte|default(0)|int) %}
+                                    <span class="px-2.5 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold">
+                                        {{ produit.stock }} (Alerte)
+                                    </span>
+                                {% else %}
+                                    <span class="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
+                                        {{ produit.stock }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 px-6">
+                                {% if produit.date_peremption %}
+                                    <span class="text-xs text-gray-500">{{ produit.date_peremption.strftime('%d/%m/%Y') }}</span>
+                                {% else %}
+                                    <span class="text-xs text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="py-16 text-center text-gray-400">
+                                <i data-lucide="package" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
+                                <p class="font-medium text-gray-500">Aucun produit en inventaire actuellement.</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="modalProduit" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 transform scale-95 transition-transform duration-300 mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b pb-4 mb-4">
+            <h3 class="text-lg font-bold text-gray-800">Nouveau Produit</h3>
+            <button onclick="toggleModal(false)" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        
+        <form method="POST" action="{{ url_for('main.produits') }}" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nom du produit *</label>
+                <input type="text" name="nom" required class="w-full px-4 py-2 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#355867]/20">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Catégorie *</label>
+                    <select name="categorie_id" required class="w-full px-4 py-2 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#355867]/20">
+                        <option value="">Choisir...</option>
+                        {% for c in categories %}
+                            <option value="{{ c.id }}">{{ c.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Fournisseur *</label>
+                    <select name="fournisseur_id" required class="w-full px-4 py-2 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#355867]/20">
+                        <option value="">Choisir...</option>
+                        {% for f in fournisseurs %}
+                            <option value="{{ f.id }}">{{ f.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Prix Achat (HT) *</label>
+                    <input type="number" step="0.01" name="prix_achat" required class="w-full px-4 py-2 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#355867]/20">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Prix Vente (HT) *</label>
+                    <input type="number" step="0.01" name="prix_vente" required class="w-full px-4 py-2 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#355867]/20">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">TVA (%)</label>
+                    <input type="number" step="0.01" name="tva" placeholder="Ex: 18" class="w-full px-4 py-2 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#355867]/20">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Date de péremption</label>
+                    <input type="date" name="date_peremption" class="w-full px-4 py-2 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#355867]/20">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Stock Initial *</label>
+                <input type="number" name="stock" required class="w-full px-4 py-2 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#355867]/20">
+            </div>
+
+            <div class="flex justify-end gap-3 border-t pt-4 mt-6">
+                <button type="button" onclick="toggleModal(false)" class="px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 rounded-xl transition">Annuler</button>
+                <button type="submit" class="px-5 py-2 text-sm font-bold text-white bg-[#355867] hover:bg-[#27424e] rounded-xl transition">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleModal(show) {
+        const modal = document.getElementById('modalProduit');
+        if (show) {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('scale-95');
+            }, 10);
+        } else {
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    }
+
+    // Algorithme de filtrage dynamique et de recherche instantanée
+    document.getElementById('rechercheProduit').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#tableProduits tbody tr');
+
+        rows.forEach(row => {
+            const nameEl = row.querySelector('.raw-name');
+            // Évite de planter sur la ligne par défaut s'il n'y a pas de produits
+            if (!nameEl) return;
+
+            const name = nameEl.textContent.toLowerCase();
+            const code = row.querySelector('.raw-code').textContent.toLowerCase();
+            const cat = row.querySelector('.raw-cat').textContent.toLowerCase();
+
+            if (name.includes(query) || code.includes(query) || cat.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

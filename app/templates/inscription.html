@@ -1,0 +1,91 @@
+{% extends "auth_base.html" %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block auth_title %}
+Créer un compte
+{% endblock %}
+
+{% block content %}
+
+<form method="POST" action="{{ url_for('main.inscription') }}" class="space-y-4">
+
+    {{ form.hidden_tag() }}
+
+    <!-- Nom -->
+    <div>
+        {{ form.nom.label(class="block text-xs font-bold text-gray-400 uppercase mb-2") }}
+        {{ form.nom(
+            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition",
+            placeholder="Votre nom"
+        ) }}
+
+        {% for error in form.nom.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <!-- Email -->
+    <div>
+        {{ form.email.label(class="block text-xs font-bold text-gray-400 uppercase mb-2") }}
+        {{ form.email(
+            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition",
+            placeholder="votre@email.com"
+        ) }}
+
+        {% for error in form.email.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <!-- Mot de passe -->
+    <div>
+        {{ form.mot_de_passe.label(class="block text-xs font-bold text-gray-400 uppercase mb-2") }}
+        {{ form.mot_de_passe(
+            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition",
+            placeholder="••••••••"
+        ) }}
+
+        {% for error in form.mot_de_passe.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <!-- Bouton d'inscription -->
+    {{ form.submit(
+        class="w-full py-3 px-4 mt-2 bg-primary hover:bg-[#4a3bc4] text-white font-bold rounded-xl transition cursor-pointer"
+    ) }}
+
+</form>
+
+<p class="text-center text-sm text-gray-500 mt-6">
+    Déjà un compte ?
+    <a href="{{ url_for('main.login') }}"
+       class="font-semibold text-primary hover:underline">
+         Se connecter
+    </a>
+</p>
+
+<!-- SCRIPT DE DISPARITION AUTOMATIQUE DES MESSAGES FLASH -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const alerts = document.querySelectorAll('.rounded-xl, [class*="alert"]');
+        
+        alerts.forEach(function(alert) {
+            if (alert.classList.contains('bg-green-100') || alert.classList.contains('bg-red-100') || alert.classList.contains('bg-blue-100')) {
+                alert.style.transition = 'all 0.5s ease-out';
+                
+                setTimeout(function() {
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-10px)';
+                    
+                    setTimeout(function() {
+                        alert.remove();
+                    }, 500); 
+                }, 2000);
+            }
+        });
+    });
+</script>
+
+{% endblock %}

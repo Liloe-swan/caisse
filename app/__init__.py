@@ -26,5 +26,8 @@ def create_app():
     # Création des tables au démarrage si elles n'existent pas
     with app.app_context():
         db.create_all()
+        
+        from app.seed import seed_database
+        seed_database()
 
     return app

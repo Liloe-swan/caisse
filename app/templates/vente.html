@@ -1,0 +1,371 @@
+{% extends "base.html" %} {% block content %}
+<div class="h-[calc(100vh-140px)] flex gap-6 overflow-hidden -m-8 p-8 bg-[#efefef]">
+    
+    <div class="flex-1 flex flex-col gap-6 overflow-hidden">
+        
+        <div class="bg-white rounded-2xl p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <i data-lucide="star" class="w-4 h-4 text-amber-500 fill-amber-500"></i> Articles Fréquents
+            </h3>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="ajouterAuPanierParDesignation('Café Noir')" class="bg-slate-50 hover:bg-slate-100 border border-gray-100 rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm font-semibold text-gray-700 transition">
+                    <i data-lucide="coffee" class="w-4 h-4 text-emerald-600"></i> Café Noir <span class="text-xs bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">1 500 F</span>
+                </button>
+                <button onclick="ajouterAuPanierParDesignation('Eau Minérale 1.5L')" class="bg-slate-50 hover:bg-slate-100 border border-gray-100 rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm font-semibold text-gray-700 transition">
+                    <i data-lucide="droplet" class="w-4 h-4 text-blue-500"></i> Eau Minérale 1.5L <span class="text-xs bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">500 F</span>
+                </button>
+                <button onclick="ajouterAuPanierParDesignation('Pain Complet')" class="bg-slate-50 hover:bg-slate-100 border border-gray-100 rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm font-semibold text-gray-700 transition">
+                    <i data-lucide="croissant" class="w-4 h-4 text-amber-600"></i> Pain Complet <span class="text-xs bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">800 F</span>
+                </button>
+                <button onclick="ajouterAuPanierParDesignation('Lait Local')" class="bg-slate-50 hover:bg-slate-100 border border-gray-100 rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm font-semibold text-gray-700 transition">
+                    <i data-lucide="milk" class="w-4 h-4 text-sky-500"></i> Lait Local <span class="text-xs bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">1 200 F</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 bg-white rounded-2xl p-6 shadow-sm flex flex-col overflow-hidden">
+            
+            <div class="flex justify-between items-center mb-6 gap-4">
+                <div class="relative flex-1 max-w-md">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                        <i data-lucide="filter" class="w-4 h-4"></i>
+                    </span>
+                    <input type="text" id="recherche-input" placeholder="Filtrer le catalogue actuel..." class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[#355867] focus:bg-white transition-all">
+                </div>
+                
+                <div class="flex gap-2 text-sm overflow-x-auto pb-1 max-w-xl">
+                    <button onclick="filtrerCategorie('Tout')" id="btn-cat-Tout" class="cat-btn px-4 py-2 bg-[#355867] text-white font-semibold rounded-lg shadow-sm">Tout</button>
+                    {% for cat in categories %}
+                    <button onclick="filtrerCategorie('{{ cat.nom | escape }}')" id="btn-cat-{{ cat.nom | replace(' ', '-') | escape }}" class="cat-btn px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">{{ cat.nom }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto pr-1">
+                {% if produits and produits|length > 0 %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="container-produits">
+                        {% for produit in produits %}
+                            <div class="produit-card bg-white border border-gray-100 hover:border-gray-200 hover:shadow-md rounded-xl p-4 flex flex-col justify-between transition group relative" 
+                                 data-nom="{{ produit.designation | lower }}" 
+                                 data-categorie="{{ produit.categorie.nom }}">
+                                <div>
+                                    <div class="flex justify-between items-start mb-2">
+                                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-gray-100 text-gray-600">{{ produit.categorie.nom }}</span>
+                                        <span class="text-xs {% if produit.stock > produit.seuil_alerte %}text-emerald-600 bg-emerald-50{% else %}text-red-600 bg-red-50{% endif %} px-2 py-0.5 rounded font-medium">
+                                            Stock: {{ produit.stock }}
+                                        </span>
+                                    </div>
+                                    <h4 class="font-bold text-gray-800 text-base mb-1 group-hover:text-[#355867] transition">{{ produit.designation }}</h4>
+                                    <p class="text-xs text-gray-400 mb-4">Réf: {{ produit.reference or 'N/A' }}</p>
+                                </div>
+                                <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
+                                    <span class="text-lg font-black text-gray-900">{{ produit.prix_ttc }} <span class="text-xs font-normal text-gray-500">FCFA</span></span>
+                                    <button onclick="ajouterAuPanierByID({{ produit.id }})" class="p-2 bg-[#355867] hover:bg-[#27424d] text-white rounded-lg transition shadow-sm hover:scale-105 transform">
+                                        <i data-lucide="plus" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="h-full flex flex-col items-center justify-center text-center text-gray-400 py-12">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-50 text-slate-300 flex items-center justify-center mb-4">
+                            <i data-lucide="package" class="w-8 h-8"></i>
+                        </div>
+                        <p class="font-semibold text-gray-700">Aucun produit disponible</p>
+                        <p class="text-sm max-w-xs mt-1">Allez dans l'onglet Produits pour alimenter votre stock.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+    <div class="w-[400px] bg-white rounded-2xl shadow-lg border border-gray-100 flex flex-col overflow-hidden">
+        
+        <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/70">
+            <div class="flex items-center gap-2">
+                <i data-lucide="receipt" class="w-5 h-5 text-[#355867]"></i>
+                <span class="font-bold text-gray-800">Ticket en cours</span>
+            </div>
+            <button onclick="viderPanier()" class="text-xs font-bold text-red-500 hover:text-red-600 flex items-center gap-1 transition">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Vider
+            </button>
+        </div>
+
+        <div id="conteneur-panier" class="flex-1 overflow-y-auto p-5 space-y-4">
+            </div>
+
+        <div class="p-5 border-t border-gray-100 bg-gray-50/50 mt-auto">
+            <div class="space-y-2.5 mb-5 text-sm">
+                <div class="flex justify-between text-gray-500">
+                    <span>Sous-total (HT)</span>
+                    <span id="facture-subtotal" class="font-semibold text-gray-700">0 FCFA</span>
+                </div>
+                <div class="flex justify-between text-gray-500">
+                    <span>TVA cumulée</span>
+                    <span id="facture-tva" class="font-semibold text-gray-700">0 FCFA</span>
+                </div>
+                <div class="border-t border-dashed border-gray-200 my-2"></div>
+                <div class="flex justify-between items-baseline">
+                    <span class="font-bold text-gray-800 text-base">TOTAL À PAYER</span>
+                    <span id="facture-total" class="text-2xl font-black text-emerald-600">0 FCFA</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                <button onclick="choisirMethode(this, 'Espèces')" class="btn-pay py-2 px-1 border border-emerald-500 bg-emerald-50 text-emerald-700 rounded-xl font-bold text-xs flex flex-col items-center gap-1 shadow-sm">
+                    <i data-lucide="banknote" class="w-4 h-4"></i> Espèces
+                </button>
+                <button onclick="choisirMethode(this, 'Carte')" class="btn-pay py-2 px-1 border border-gray-200 hover:border-gray-300 rounded-xl font-semibold text-gray-600 text-xs flex flex-col items-center gap-1 transition">
+                    <i data-lucide="credit-card" class="w-4 h-4"></i> Carte
+                </button>
+                <button onclick="choisirMethode(this, 'Mobile')" class="btn-pay py-2 px-1 border border-gray-200 hover:border-gray-300 rounded-xl font-semibold text-gray-600 text-xs flex flex-col items-center gap-1 transition">
+                    <i data-lucide="smartphone" class="w-4 h-4"></i> Mobile
+                </button>
+            </div>
+
+            <button onclick="encaisserPanier()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-150 flex items-center justify-center gap-2 tracking-wide transform active:scale-95">
+                <i data-lucide="check-square" class="w-5 h-5"></i>
+                Encaisser & Imprimer Ticket
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    // Chargement initial des produits depuis le contexte Jinja
+    const DB_PRODUITS = [
+        {% for produit in produits %}
+        {
+            id: {{ produit.id }},
+            designation: "{{ produit.designation | escape }}",
+            prix_vente: {{ produit.prix_vente }}, // Prix HT
+            prix_ttc: {{ produit.prix_ttc }},     // Prix TTC
+            taux_tva: {{ produit.taux_tva }},
+            stock: {{ produit.stock }},
+            categorie: "{{ produit.categorie.nom | escape }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    let panier = [];
+    let methodePaiement = "Espèces";
+
+    // 1. FILTRAGE DYNAMIQUE (Client-side)
+    const rechercheInput = document.getElementById('recherche-input');
+    let categorieSelectionnee = "Tout";
+
+    function filtrerCatalogue() {
+        const query = rechercheInput.value.toLowerCase();
+        const cartes = document.querySelectorAll('.produit-card');
+
+        cartes.forEach(carte => {
+            const nom = carte.getAttribute('data-nom');
+            const cat = carte.getAttribute('data-categorie');
+
+            const matchQuery = nom.includes(query);
+            const matchCat = (categorieSelectionnee === "Tout" || cat === categorieSelectionnee);
+
+            if (matchQuery && matchCat) {
+                carte.style.display = 'flex';
+            } else {
+                carte.style.display = 'none';
+            }
+        });
+    }
+
+    rechercheInput.addEventListener('input', filtrerCatalogue);
+
+    function filtrerCategorie(catNom) {
+        categorieSelectionnee = catNom;
+        
+        // Gérer les styles des boutons de filtre
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.classList.remove('bg-[#355867]', 'text-white', 'font-semibold', 'shadow-sm');
+            btn.classList.add('text-gray-600', 'hover:bg-gray-100');
+        });
+
+        // Appliquer la classe active au bon bouton
+        const activeID = 'btn-cat-' + catNom.replace(/\s+/g, '-');
+        const activeBtn = document.getElementById(activeID);
+        if (activeBtn) {
+            activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+            activeBtn.classList.add('bg-[#355867]', 'text-white', 'font-semibold', 'shadow-sm');
+        }
+
+        filtrerCatalogue();
+    }
+
+    // 2. AJOUTER DES ARTICLES AU PANIER
+    function ajouterAuPanierByID(id) {
+        const produit = DB_PRODUITS.find(p => p.id === id);
+        if (!produit) return;
+
+        const lignePanier = panier.find(item => item.id === id);
+
+        if (lignePanier) {
+            if (lignePanier.quantite >= produit.stock) {
+                alert(`Action impossible : Le stock de "${produit.designation}" est limité à ${produit.stock} unités.`);
+                return;
+            }
+            lignePanier.quantite += 1;
+        } else {
+            if (produit.stock <= 0) {
+                alert(`Action impossible : "${produit.designation}" est actuellement en rupture de stock.`);
+                return;
+            }
+            panier.push({
+                id: produit.id,
+                designation: produit.designation,
+                prix_vente: produit.prix_vente, // HT
+                prix_ttc: produit.prix_ttc,     // TTC
+                taux_tva: produit.taux_tva,
+                stock: produit.stock,
+                quantite: 1
+            });
+        }
+        renderPanier();
+    }
+
+    // Gère le cas des articles fréquents
+    function ajouterAuPanierParDesignation(designation) {
+        const produit = DB_PRODUITS.find(p => p.designation.toLowerCase() === designation.toLowerCase());
+        if (!produit) {
+            alert(`Le produit "${designation}" n'est pas répertorié dans la base de données.`);
+            return;
+        }
+        ajouterAuPanierByID(produit.id);
+    }
+
+    // 3. ACTIONS PANIER (Modifier Quantité & Vider)
+    function modifierQuantite(id, delta) {
+        const item = panier.find(i => i.id === id);
+        if (!item) return;
+
+        item.quantite += delta;
+
+        if (item.quantite <= 0) {
+            panier = panier.filter(i => i.id !== id);
+        } else if (item.quantite > item.stock) {
+            alert(`Stock maximum de ${item.stock} unités atteint.`);
+            item.quantite = item.stock;
+        }
+        renderPanier();
+    }
+
+    function viderPanier() {
+        panier = [];
+        renderPanier();
+    }
+
+    function choisirMethode(btn, methode) {
+        methodePaiement = methode;
+        document.querySelectorAll('.btn-pay').forEach(b => {
+            b.classList.remove('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+            b.classList.add('border-gray-200', 'hover:border-gray-300', 'text-gray-600');
+        });
+        btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+        btn.classList.remove('border-gray-200', 'hover:border-gray-300', 'text-gray-600');
+    }
+
+    // 4. RENDU VISUEL ET CALCULS DE TVA
+    function renderPanier() {
+        const conteneur = document.getElementById('conteneur-panier');
+        conteneur.innerHTML = '';
+
+        if (panier.length === 0) {
+            conteneur.innerHTML = `
+                <div class="h-full flex flex-col items-center justify-center text-center text-gray-400 py-12">
+                    <i data-lucide="shopping-cart" class="w-12 h-12 mb-2 text-gray-300"></i>
+                    <p class="text-sm font-semibold">Le ticket est vide</p>
+                </div>
+            `;
+            document.getElementById('facture-subtotal').innerText = "0 FCFA";
+            document.getElementById('facture-tva').innerText = "0 FCFA";
+            document.getElementById('facture-total').innerText = "0 FCFA";
+            lucide.createIcons();
+            return;
+        }
+
+        let totalHT = 0;
+        let totalTVA = 0;
+        let totalTTC = 0;
+
+        panier.forEach(item => {
+            const itemTTC = item.prix_ttc * item.quantite;
+            const itemHT = item.prix_vente * item.quantite;
+            const itemTVA = itemTTC - itemHT;
+
+            totalHT += itemHT;
+            totalTVA += itemTVA;
+            totalTTC += itemTTC;
+
+            conteneur.innerHTML += `
+                <div class="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 transition animate-fadeIn">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-sm text-gray-800 truncate">${item.designation}</p>
+                        <p class="text-xs text-gray-500 mt-0.5">${item.prix_ttc.toLocaleString()} FCFA / u</p>
+                    </div>
+                    
+                    <div class="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm">
+                        <button onclick="modifierQuantite(${item.id}, -1)" class="p-1 px-2 hover:bg-gray-50 text-gray-500 font-bold transition rounded-l-lg">-</button>
+                        <span class="px-2 text-sm font-bold text-gray-800 bg-gray-50/50 min-w-[24px] text-center">${item.quantite}</span>
+                        <button onclick="modifierQuantite(${item.id}, 1)" class="p-1 px-2 hover:bg-gray-50 text-gray-500 font-bold transition rounded-r-lg">+</button>
+                    </div>
+                    
+                    <div class="text-right min-w-[70px]">
+                        <span class="font-extrabold text-sm text-gray-900">${Math.round(itemTTC).toLocaleString()} F</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('facture-subtotal').innerText = Math.round(totalHT).toLocaleString() + " FCFA";
+        document.getElementById('facture-tva').innerText = Math.round(totalTVA).toLocaleString() + " FCFA";
+        document.getElementById('facture-total').innerText = Math.round(totalTTC).toLocaleString() + " FCFA";
+        lucide.createIcons();
+    }
+
+    // 5. ENCAISSEMENT AJAX ENVOI AU SERVEUR FLASK
+    async function encaisserPanier() {
+        if (panier.length === 0) {
+            alert("Impossible de valider un ticket de caisse vide.");
+            return;
+        }
+
+        const payload = {
+            panier: panier.map(item => ({ id: item.id, quantite: item.quantite })),
+            mode_paiement: methodePaiement
+        };
+
+        try {
+            const response = await fetch('/vente/creer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("La vente a été enregistrée avec succès. Ticket prêt pour l'impression.");
+                viderPanier();
+                window.location.reload(); // Actualise les stocks visuels
+            } else {
+                alert("Erreur lors de la validation : " + result.message);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Erreur de connexion au serveur de caisse.");
+        }
+    }
+
+    // Initialisation
+    document.addEventListener("DOMContentLoaded", () => {
+        renderPanier();
+    });
+</script>
+{% endblock %}

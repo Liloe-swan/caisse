@@ -1,23 +1,57 @@
-{% extends "base.html" %}
-{% block titre %}Connexion{% endblock %}
+{% extends "auth_base.html" %}
 
-{% block contenu %}
-<div class="col-md-6 mx-auto">
-    <h2 class="mb-4">Se connecter</h2>
-    <form method="POST">
-        {{ form.hidden_tag() }}
+{% block title %}Connexion{% endblock %}
 
-        <div class="mb-3">
-            {{ form.email.label(class="form-label") }}
-            {{ form.email(class="form-control") }}
-        </div>
+{% block auth_title %}
+Connexion
+{% endblock %}
 
-        <div class="mb-3">
-            {{ form.mot_de_passe.label(class="form-label") }}
-            {{ form.mot_de_passe(class="form-control") }}
-        </div>
+{% block content %}
 
-        {{ form.submit(class="btn btn-primary") }}
-    </form>
-</div>
+<form method="POST" class="space-y-5">
+
+    {{ form.hidden_tag() }}
+
+    <div>
+        {{ form.email.label(class="block text-sm font-semibold text-gray-700 mb-2") }}
+
+        {{ form.email(
+            class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition",
+            placeholder="votre@email.com"
+        ) }}
+
+        {% for error in form.email.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form.mot_de_passe.label(class="block text-sm font-semibold text-gray-700 mb-2") }}
+
+        {{ form.mot_de_passe(
+            class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition",
+            placeholder="••••••••"
+        ) }}
+
+        {% for error in form.mot_de_passe.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <div class="pt-2">
+        {{ form.submit(
+            class="w-full bg-primary hover:bg-[#4b3bd4] text-white font-bold py-3 rounded-xl transition duration-200 cursor-pointer"
+        ) }}
+    </div>
+
+</form>
+
+<p class="mt-8 text-center text-sm text-gray-600">
+    Vous n'avez pas encore de compte ?
+    <a href="{{ url_for('main.inscription') }}"
+       class="font-semibold text-primary hover:underline">
+        S'inscrire
+    </a>
+</p>
+
 {% endblock %}

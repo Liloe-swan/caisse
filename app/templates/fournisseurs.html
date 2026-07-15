@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestion des Fournisseurs - SmartCaisse{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-2xl p-6 shadow-sm flex items-center justify-between border border-gray-100">
+            <div>
+                <p class="text-xs font-bold text-gray-400 tracking-wider uppercase">Total Fournisseurs</p>
+                <h3 class="text-3xl font-black text-gray-800 mt-1">{{ fournisseurs|length }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
+                <i data-lucide="truck" class="w-6 h-6"></i>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl p-6 shadow-sm flex items-center justify-between border border-gray-100">
+            <div>
+                <p class="text-xs font-bold text-gray-400 tracking-wider uppercase">Fournisseurs Actifs</p>
+                <h3 class="text-3xl font-black text-gray-800 mt-1">{{ fournisseurs|length }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500">
+                <i data-lucide="check-circle" class="w-6 h-6"></i>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-sm flex items-center justify-between border border-gray-100">
+            <div>
+                <p class="text-xs font-bold text-gray-400 tracking-wider uppercase">Livraisons en attente</p>
+                <h3 class="text-3xl font-black text-amber-500 mt-1">
+                    {{ livraisons_en_attente|default(0) }}
+                </h3>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
+                <i data-lucide="clock" class="w-6 h-6"></i>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-sm flex items-center justify-between border border-gray-100">
+            <div>
+                <p class="text-xs font-bold text-gray-400 tracking-wider uppercase">Dettes Fournisseurs</p>
+                <h3 class="text-2xl font-black text-rose-600 mt-1.5">
+                    {{ total_dettes|default(0) }} FCFA
+                </h3>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500">
+                <i data-lucide="credit-card" class="w-6 h-6"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+        <div class="relative w-full sm:w-80">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                <i data-lucide="search" class="w-5 h-5"></i>
+            </span>
+            <input type="text" id="searchFournisseur" placeholder="Rechercher un fournisseur..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#355867] transition">
+        </div>
+        
+        <button type="button" id="openModalBtn" class="w-full sm:w-auto bg-[#355867] hover:bg-[#2b4855] text-white px-5 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition shadow-sm">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            <span>Ajouter un fournisseur</span>
+        </button>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" id="tableFournisseurs">
+                <thead>
+                    <tr class="bg-gray-50/75 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <th class="px-6 py-4 w-16 text-center">#</th>
+                        <th class="px-6 py-4">Nom du Fournisseur</th>
+                        <th class="px-6 py-4">Email / Contact</th>
+                        <th class="px-6 py-4">Téléphone</th>
+                        <th class="px-6 py-4">Adresse</th>
+                        <th class="px-6 py-4">Statut</th>
+                        <th class="px-6 py-4 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm text-gray-600">
+                    {% if fournisseurs and fournisseurs|length > 0 %}
+                        {% for f in fournisseurs %}
+                        <tr class="hover:bg-gray-50/50 transition">
+                            <td class="px-6 py-4 text-center font-semibold text-gray-800">{{ loop.index }}</td>
+                            <td class="px-6 py-4 font-bold text-[#355867] raw-name">{{ f.nom }}</td>
+                            <td class="px-6 py-4 raw-email">{{ f.email or 'Non renseigné' }}</td>
+                            <td class="px-6 py-4">{{ f.telephone or 'Non renseigné' }}</td>
+                            <td class="px-6 py-4">{{ f.adresse or 'Non renseigné' }}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                    Actif
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center gap-3">
+                                    <button type="button" onclick="editFournisseur('{{ f.id }}', '{{ f.nom|escape }}', '{{ f.email|default('')|escape }}', '{{ f.telephone|default('')|escape }}', '{{ f.adresse|default('')|escape }}')" class="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition" title="Modifier">
+                                        <i data-lucide="edit" class="w-4 h-4"></i>
+                                    </button>
+                                    <button type="button" onclick="confirmDelete('{{ f.id }}', '{{ f.nom|escape }}')" class="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition" title="Supprimer">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-16 text-center text-gray-400">
+                                <i data-lucide="truck" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
+                                <p class="font-medium text-gray-500">Aucun fournisseur enregistré pour le moment.</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="fournisseurModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4">
+            <h3 id="modalTitle" class="text-xl font-bold text-gray-800">Nouveau Fournisseur</h3>
+            <button type="button" class="close-modal-trigger text-gray-400 hover:text-gray-600 focus:outline-none">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+        <form id="fournisseurForm" action="{{ url_for('main.enregistrer_fournisseur') }}" method="POST" class="space-y-4">
+            <input type="hidden" name="fournisseur_id" id="form_id">
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nom du Fournisseur *</label>
+                <input type="text" name="nom" id="form_nom" required placeholder="Ex: DistriBio S.A." class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#355867]">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email de contact</label>
+                <input type="email" name="contact" id="form_contact" placeholder="Ex: contact@distribio.com" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#355867]">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Téléphone</label>
+                <input type="text" name="telephone" id="form_telephone" placeholder="Ex: +221 77 123 45 67" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#355867]">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Adresse</label>
+                <input type="text" name="adresse" id="form_adresse" placeholder="Ex: Dakar, Rue 10" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#355867]">
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" id="cancelModalBtn" class="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-xl transition">Annuler</button>
+                <button type="submit" class="px-5 py-2 bg-[#355867] hover:bg-[#2b4855] text-white rounded-xl font-bold transition">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const modal = document.getElementById('fournisseurModal');
+    const openBtn = document.getElementById('openModalBtn');
+    const cancelBtn = document.getElementById('cancelModalBtn');
+    const form = document.getElementById('fournisseurForm');
+    const modalTitle = document.getElementById('modalTitle');
+    
+    // Sélection de tous les déclencheurs de fermeture (croix + bouton annuler)
+    const closeTriggers = document.querySelectorAll('.close-modal-trigger, #cancelModalBtn');
+
+    function toggleModal(show, isEdit = false) {
+        if (show) {
+            if (!isEdit) {
+                form.reset();
+                document.getElementById('form_id').value = '';
+                modalTitle.textContent = "Nouveau Fournisseur";
+            }
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.transform').classList.remove('scale-95');
+            }, 50);
+        } else {
+            modal.classList.add('opacity-0');
+            modal.querySelector('.transform').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    }
+
+    if (openBtn) {
+        openBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleModal(true, false);
+        });
+    }
+
+    // Assignation de la fermeture sur tous les éléments déclencheurs
+    closeTriggers.forEach(btn => {
+        btn.addEventListener('click', () => toggleModal(false));
+    });
+
+    // Pré-remplit le formulaire en mode édition
+    function editFournisseur(id, nom, email, telephone, adresse) {
+        document.getElementById('form_id').value = id;
+        document.getElementById('form_nom').value = nom;
+        document.getElementById('form_contact').value = email !== 'None' && email !== '' ? email : '';
+        document.getElementById('form_telephone').value = telephone !== 'None' && telephone !== '' ? telephone : '';
+        document.getElementById('form_adresse').value = adresse !== 'None' && adresse !== '' ? adresse : '';
+        
+        modalTitle.textContent = "Modifier le Fournisseur";
+        toggleModal(true, true);
+    }
+
+    // Confirmation avant suppression
+    function confirmDelete(id, nom) {
+        if (confirm(`Voulez-vous vraiment supprimer le fournisseur "${nom}" ?`)) {
+            window.location.href = `/fournisseurs/delete/${id}`;
+        }
+    }
+
+    // Barre de recherche instantanée dynamique
+    document.getElementById('searchFournisseur').addEventListener('input', function(e) {
+        const text = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('#tableFournisseurs tbody tr').forEach(tr => {
+            const nomEl = tr.querySelector('.raw-name');
+            if (nomEl) {
+                const nom = nomEl.textContent.toLowerCase();
+                const emailEl = tr.querySelector('.raw-email');
+                const email = emailEl ? emailEl.textContent.toLowerCase() : '';
+                if (nom.includes(text) || email.includes(text)) {
+                    tr.style.display = '';
+                } else {
+                    tr.style.display = 'none';
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
